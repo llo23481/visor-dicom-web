@@ -1,83 +1,203 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Visor DICOM Web</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            padding: 6px;
-            width: 300px;
-            font-size: 16px;
-        }
-        button {
-            padding: 6px 12px;
-            font-size: 16px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #eeeeee;
-        }
-        a.download-btn {
-            text-decoration: none;
-            color: white;
-            background-color: #007BFF;
-            padding: 6px 10px;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Visor DICOM Web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fff;
+      color: #333;
+    }
+
+    header {
+      background-color: #b00020;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .top-bar input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .top-bar button {
+      background-color: #b00020;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .filter-panel {
+      display: none;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      background-color: #f8f8f8;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .filter-panel.show {
+      display: flex;
+    }
+
+    .filter-panel button {
+      padding: 0.5rem 1rem;
+      background-color: #e0e0e0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .filter-panel .export-btn {
+      background-color: #0077cc;
+      color: white;
+    }
+
+    .filter-panel .refresh-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8f8f8;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .download-btn {
+      background-color: #b00020;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 1rem;
+      background-color: #f8f8f8;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
-    <h1>Visor DICOM Web</h1>
 
-    <form method="get" action="/">
-        <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ q }}">
-        <button type="submit">🔍 Buscar</button>
-    </form>
+<header>
+  <h1>Visor DICOM Web</h1>
+</header>
 
-    <table>
-        <tr>
-            <th>Nombre del Paciente</th>
-            <th>Fecha</th>
-            <th>Fecha Nacimiento</th>
-            <th>Descripción</th>
-            <th>ID Paciente</th>
-            <th>Institución</th>
-            <th>Archivo</th>
-        </tr>
-        {% for estudio in estudios %}
-        <tr>
-            <td>{{ estudio.nombre_paciente }}</td>
-            <td>{{ estudio.fecha }}</td>
-            <td>{{ estudio.fecha_nacimiento }}</td>
-            <td>{{ estudio.descripcion }}</td>
-            <td>{{ estudio.id_paciente }}</td>
-            <td>{{ estudio.institucion }}</td>
-            <td>
-                <a class="download-btn" href="/archivos/{{ estudio.archivo }}" download>Descargar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<main>
+  <div class="top-bar">
+    <input type="text" id="searchInput" placeholder="Buscar...">
+    <button onclick="toggleFilters()">Filters &#9662;</button>
+  </div>
+
+  <div class="filter-panel" id="filterPanel">
+    <button onclick="filtrarPor('nombre')">Nombre</button>
+    <button onclick="filtrarPor('id')">ID</button>
+    <button onclick="filtrarPor('institucion')">Institución</button>
+    <button onclick="filtrarPor('edad')">Edad</button>
+    <button class="export-btn" onclick="exportarEstudios()">Exportar</button>
+    <button class="refresh-btn" onclick="cargarEstudios()">Refrescar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Descripción</th>
+        <th>Institución</th>
+        <th>Descargar</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-estudios">
+      <!-- Datos cargados aquí -->
+    </tbody>
+  </table>
+</main>
+
+<footer>
+  &copy; 2025 Visor Médico. Todos los derechos reservados.
+</footer>
+
+<script>
+  function toggleFilters() {
+    document.getElementById("filterPanel").classList.toggle("show");
+  }
+
+  function filtrarPor(tipo) {
+    alert("Filtrar por: " + tipo);
+    // Aquí puedes implementar filtros personalizados con campos
+  }
+
+  function exportarEstudios() {
+    alert("Exportar estudios...");
+    // Aquí puedes hacer descarga DICOM o PDF, usando un endpoint de tu backend
+  }
+
+  function cargarEstudios() {
+    fetch("/estudios")
+      .then(res => res.json())
+      .then(data => {
+        const tabla = document.getElementById("tabla-estudios");
+        tabla.innerHTML = data.map(estudio => `
+          <tr>
+            <td>${estudio.nombre}</td>
+            <td>${estudio.id_paciente}</td>
+            <td>${estudio.fecha}</td>
+            <td>${estudio.descripcion}</td>
+            <td>${estudio.institucion}</td>
+            <td><a class="download-btn" href="${estudio.archivo}" download>Descargar</a></td>
+          </tr>
+        `).join("");
+      });
+  }
+
+  // Inicial
+  cargarEstudios();
+</script>
+
 </body>
 </html>
