@@ -9,6 +9,12 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import pydicom
 import shutil
 import os
+from pathlib import Path
+
+# Definir ruta base
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+ARCHIVOS_DIR = BASE_DIR / "archivos"
 
 # DB setup
 DATABASE_URL = "sqlite:///./estudios.db"
@@ -30,12 +36,12 @@ class Estudio(Base):
 Base.metadata.create_all(bind=engine)
 
 # Crear carpeta de archivos si no existe
-os.makedirs("backend/archivos", exist_ok=True)
+os.makedirs(ARCHIVOS_DIR, exist_ok=True)
 
 # FastAPI App
 app = FastAPI()
-templates = Jinja2Templates(directory="frontend")
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+templates = Jinja2Templates(directory=str(FRONTEND_DIR))
+app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 # Página principal con buscador
 @app.get("/", response_class=HTMLResponse)
@@ -51,14 +57,14 @@ def read_root(request: Request, q: str = ""):
 # Subida de DICOM automática
 @app.post("/subir/")
 async def subir_dicom(file: UploadFile = File(...)):
-    ruta_archivo = f"backend/archivos/{file.filename}"
+    ruta_archivo = ARCHIVOS_DIR / file.filename
 
     # Guardar archivo
     with open(ruta_archivo, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     # Leer datos DICOM
-    dicom = pydicom.dcmread(ruta_archivo)
+    dicom = pydicom.dcmread(str(ruta_archivo))
     nombre = dicom.get("PatientName", "Desconocido")
     fecha = dicom.get("StudyDate", "Sin fecha")
     nacimiento = dicom.get("PatientBirthDate", "Desconocido")
