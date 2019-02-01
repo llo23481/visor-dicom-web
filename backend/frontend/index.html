@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visor DICOM Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 6px;
+            width: 300px;
+            font-size: 16px;
+        }
+        button {
+            padding: 6px 12px;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #eeeeee;
+        }
+        a.download-btn {
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            padding: 6px 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Visor DICOM Web</h1>
+
+    <form method="get" action="/">
+        <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ q }}">
+        <button type="submit">🔍 Buscar</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>Nombre del Paciente</th>
+            <th>Fecha</th>
+            <th>Fecha Nacimiento</th>
+            <th>Descripción</th>
+            <th>ID Paciente</th>
+            <th>Institución</th>
+            <th>Archivo</th>
+        </tr>
+        {% for estudio in estudios %}
+        <tr>
+            <td>{{ estudio.nombre_paciente }}</td>
+            <td>{{ estudio.fecha }}</td>
+            <td>{{ estudio.fecha_nacimiento }}</td>
+            <td>{{ estudio.descripcion }}</td>
+            <td>{{ estudio.id_paciente }}</td>
+            <td>{{ estudio.institucion }}</td>
+            <td>
+                <a class="download-btn" href="/archivos/{{ estudio.archivo }}" download>Descargar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

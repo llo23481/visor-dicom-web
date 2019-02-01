@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Visor de Estudios</title>
+  <style>
+    body { font-family: Arial; background-color: #f4f4f4; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 12px; border: 1px solid #ddd; }
+    th { background-color: #4CAF50; color: white; }
+    #searchBar { margin-bottom: 15px; }
+    input[type="text"] { padding: 8px; width: 60%; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h1>Visor de Estudios Médicos</h1>
+
+  <div id="searchBar">
+    <form method="get" action="/">
+      🔍 <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre">
+      <button type="submit">Buscar</button>
+    </form>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Fecha Nac.</th>
+        <th>Descripción</th>
+        <th>Institución</th>
+        <th>Descargar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for estudio in estudios %}
+      <tr>
+        <td>{{ estudio.nombre_paciente }}</td>
+        <td>{{ estudio.id_paciente }}</td>
+        <td>{{ estudio.fecha }}</td>
+        <td>{{ estudio.fecha_nacimiento }}</td>
+        <td>{{ estudio.descripcion }}</td>
+        <td>{{ estudio.institucion }}</td>
+        <td><a href="/descargar/{{ estudio.archivo }}">📥</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+</html>
