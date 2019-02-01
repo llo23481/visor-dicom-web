@@ -1,9 +1,7 @@
-from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-from typing import List
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base
 import pydicom
@@ -11,12 +9,10 @@ import shutil
 import os
 from pathlib import Path
 
-# Definir ruta base
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 ARCHIVOS_DIR = BASE_DIR / "archivos"
 
-# DB setup
 DATABASE_URL = "sqlite:///./estudios.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -35,15 +31,12 @@ class Estudio(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# Crear carpeta de archivos si no existe
 os.makedirs(ARCHIVOS_DIR, exist_ok=True)
 
-# FastAPI App
 app = FastAPI()
 templates = Jinja2Templates(directory=str(FRONTEND_DIR))
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
-# Página principal con buscador
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request, q: str = ""):
     db = SessionLocal()
@@ -54,16 +47,13 @@ def read_root(request: Request, q: str = ""):
     db.close()
     return templates.TemplateResponse("index.html", {"request": request, "estudios": resultados, "q": q})
 
-# Subida de DICOM automática
 @app.post("/subir/")
 async def subir_dicom(file: UploadFile = File(...)):
     ruta_archivo = ARCHIVOS_DIR / file.filename
 
-    # Guardar archivo
     with open(ruta_archivo, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # Leer datos DICOM
     dicom = pydicom.dcmread(str(ruta_archivo))
     nombre = dicom.get("PatientName", "Desconocido")
     fecha = dicom.get("StudyDate", "Sin fecha")
@@ -72,7 +62,6 @@ async def subir_dicom(file: UploadFile = File(...)):
     id_paciente = dicom.get("PatientID", "Sin ID")
     institucion = dicom.get("InstitutionName", "Desconocida")
 
-    # Guardar en la base de datos
     db = SessionLocal()
     nuevo = Estudio(
         nombre_paciente=str(nombre),

@@ -1,43 +1,40 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Visor de Estudios Médicos</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Visor DICOM</title>
 </head>
 <body>
-    <h1>Estudios Médicos Subidos</h1>
-
+    <h1>Estudios DICOM</h1>
     <form method="get" action="/">
         <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ q }}">
-        <button type="submit">🔍</button>
+        <button type="submit">Buscar</button>
     </form>
-
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Fecha</th>
-                <th>Fecha Nac.</th>
-                <th>Descripción</th>
-                <th>ID Paciente</th>
-                <th>Institución</th>
-                <th>Archivo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for estudio in estudios %}
-            <tr>
-                <td>{{ estudio.nombre_paciente }}</td>
-                <td>{{ estudio.fecha }}</td>
-                <td>{{ estudio.fecha_nacimiento }}</td>
-                <td>{{ estudio.descripcion }}</td>
-                <td>{{ estudio.id_paciente }}</td>
-                <td>{{ estudio.institucion }}</td>
-                <td><a href="/static/archivos/{{ estudio.archivo }}" target="_blank">Ver</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <br>
+    <form action="/subir/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Subir DICOM</button>
+    </form>
+    <br>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Nacimiento</th>
+            <th>Descripción</th>
+            <th>ID</th>
+            <th>Institución</th>
+        </tr>
+        {% for e in estudios %}
+        <tr>
+            <td>{{ e.nombre_paciente }}</td>
+            <td>{{ e.fecha }}</td>
+            <td>{{ e.fecha_nacimiento }}</td>
+            <td>{{ e.descripcion }}</td>
+            <td>{{ e.id_paciente }}</td>
+            <td>{{ e.institucion }}</td>
+        </tr>
+        {% endfor %}
     </table>
 </body>
 </html>
